@@ -1,0 +1,43 @@
+EFMesh Ambassador Firmware
+==========================
+
+This repository contains customizations layered on top of the upstream
+Meshtastic firmware ambassador module.
+
+Upstream
+--------
+
+  Original ambassador module + documentation:
+    https://github.com/ascendr/meshtastic/tree/main/ambassador
+  Original firmware source (ambassador branch of a Meshtastic fork):
+    https://github.com/ascendr/firmware/tree/ambassador
+  Upstream Meshtastic firmware:
+    https://github.com/meshtastic/firmware
+
+  Original AmbassadorModule.cpp / AmbassadorModule.h and the supporting
+  NodeDB.cpp / Modules.cpp hooks were written by Tony "ascendr" and
+  released under the GNU General Public License v3.0, the same license
+  as upstream Meshtastic firmware.
+
+License
+-------
+
+  All source code in this repository is licensed under the GNU General
+  Public License v3.0 — see LICENSE.
+
+  The build process pulls in the upstream Meshtastic firmware, which is
+  also GPLv3.
+
+EFMesh modifications
+--------------------
+
+  The Electric Forest Meshtastic Community (EFMesh, https://efmesh.com)
+  modifications are limited to three places:
+
+    1. CannedMessageModule.cpp — default ambassador invite text.
+    2. userPrefs.jsonc — default owner long_name and short_name.
+
+  EFMesh is NOT officially endorsed by, sponsored by, or affiliated with
+  Electric Forest, Insomniac, Madison House Presents, or any other
+  Electric Forest organizer. EFMesh is a community-run Meshtastic mesh
+  organized informally by Electric Forest attendees.
