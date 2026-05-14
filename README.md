@@ -5,7 +5,7 @@ Community** ([efmesh.com](https://efmesh.com)). Flash this on a spare
 Heltec V3 or V4 and it acts as a permanent "front door" beacon: it
 introduces itself to every newly-discovered neighbour node and DMs them
 the EFMesh invite. Other users see it in their node list as `⚠ Join 100+
-EFMesh.com nodes on MF!`, which doubles as a self-explanatory CTA.
+EFMesh.com on MediumFast!`, which doubles as a self-explanatory CTA.
 
 > **Not officially endorsed by Electric Forest, Insomniac, or any
 > Electric Forest organizer.** EFMesh is a community-run Meshtastic mesh
@@ -57,9 +57,9 @@ You have two options.
 7. Click **Flash**. Wait for the progress bar; the device will reboot.
 
 After flashing, the node should boot up identifying itself as `⚠ Join
-100+ EFMesh.com nodes on MF!` on whatever frequency / preset your region
-uses. Use the Meshtastic phone app to switch it onto **MediumFast** if
-that isn't already the regional default.
+100+ EFMesh.com on MediumFast!` on whatever frequency / preset your
+region uses. Use the Meshtastic phone app to switch it onto
+**MediumFast** if that isn't already the regional default.
 
 ### Option B — esptool CLI (terminal)
 
@@ -151,13 +151,13 @@ sign. The variation selector only matters on full-color emoji renderers
 "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com on MediumFast!"
 ```
 
-33 bytes including the closing `!`, fits well inside the 39-byte
+35 bytes including the closing `!`, fits well inside the 39-byte
 display budget of the 40-byte protobuf field. Format choice notes:
 
-- `EFMesh.com` not `efmesh.org` — `efmesh.com` is the canonical EFMesh
-  community website. `.org` does not resolve.
-- `MediumFast` spelled out — Will's preferred phrasing for clarity in
-  the node list (vs. the shorter `MF` abbreviation used in chat).
+- `EFMesh.com` is the canonical community website; the URL is part of
+  the wordmark so anyone scanning the node list can find the guide.
+- `MediumFast` spelled out for clarity in the node list (vs. the shorter
+  `MF` abbreviation used in chat).
 
 ## Configuration after flashing
 
