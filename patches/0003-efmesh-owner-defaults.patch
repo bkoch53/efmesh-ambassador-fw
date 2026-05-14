@@ -5,7 +5,7 @@ Subject: [PATCH 3/3] EFMesh: default owner short_name + long_name
 Bakes the EFMesh ambassador owner identity into the firmware at compile
 time via userPrefs.jsonc:
 
-  long_name  = "Join 100+ EFMesh.org on MediumFast!"   (35 utf-8 bytes,
+  long_name  = "Join 100+ EFMesh.com on MediumFast!"   (35 utf-8 bytes,
                fits in char long_name[40] with null terminator)
   short_name = "⚠"  (U+26A0, 3 utf-8 bytes, fits in char short_name[5]
                with null terminator)
@@ -32,6 +32,6 @@ Effective diff applied:
 +  // "USERPREFS_CONFIG_OWNER_LONG_NAME": "My Long Name",
 +  // "USERPREFS_CONFIG_OWNER_SHORT_NAME": "MLN",
 +  // ---- EFMesh ambassador defaults ----
-+  "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.org on MediumFast!",
++  "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com on MediumFast!",
 +  "USERPREFS_CONFIG_OWNER_SHORT_NAME": "⚠",
    // "USERPREFS_CONFIG_DEVICE_ROLE": "meshtastic_Config_DeviceConfig_Role_CLIENT",

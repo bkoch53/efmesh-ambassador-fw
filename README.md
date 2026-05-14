@@ -28,7 +28,7 @@ three EFMesh-specific customizations:
 | What | Value |
 |------|-------|
 | Owner short name | `⚠` (U+26A0 warning sign) |
-| Owner long name | `Join 100+ EFMesh.com nodes on MF!` |
+| Owner long name | `Join 100+ EFMesh.com on MediumFast!` |
 | First canned message (= ambassador invite) | `Hello! I'd like to invite you to join the Electric Forest Meshtastic Community (efmesh.com) over on MediumFast preset.` |
 
 When a new node joins the mesh, the ambassador module exchanges node
@@ -148,7 +148,7 @@ sign. The variation selector only matters on full-color emoji renderers
 ### 3. Owner long name — `src/userPrefs.jsonc`
 
 ```
-"USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com nodes on MF!"
+"USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com on MediumFast!"
 ```
 
 33 bytes including the closing `!`, fits well inside the 39-byte
@@ -156,8 +156,8 @@ display budget of the 40-byte protobuf field. Format choice notes:
 
 - `EFMesh.com` not `efmesh.org` — `efmesh.com` is the canonical EFMesh
   community website. `.org` does not resolve.
-- `MF` instead of `MediumFast` — saves 8 bytes and matches the Forest
-  community's existing slang for the preset.
+- `MediumFast` spelled out — Will's preferred phrasing for clarity in
+  the node list (vs. the shorter `MF` abbreviation used in chat).
 
 ## Configuration after flashing
 
