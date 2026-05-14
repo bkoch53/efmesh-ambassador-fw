@@ -1,0 +1,37 @@
+From: Barry <barry@curran.co>
+Date: 2026-05-14
+Subject: [PATCH 3/3] EFMesh: default owner short_name + long_name
+
+Bakes the EFMesh ambassador owner identity into the firmware at compile
+time via userPrefs.jsonc:
+
+  long_name  = "Join 100+ EFMesh.com nodes on MF!"   (33 utf-8 bytes,
+               fits in char long_name[40] with null terminator)
+  short_name = "⚠"  (U+26A0, 3 utf-8 bytes, fits in char short_name[5]
+               with null terminator)
+
+NOTE on short_name: the original request was "⚠️" (warning sign +
+variation selector U+FE0F, 6 utf-8 bytes). That does NOT fit in the
+5-byte protobuf short_name field. We strip the variation selector. On
+the Heltec V3/V4 1-bit monochrome OLED, the variation selector has no
+effect anyway — the device renders the bare ⚠ glyph from its built-in
+font. The phone-app node list also displays the bare warning sign.
+
+The actual edit lives in this repo at src/userPrefs.jsonc. Drop that
+file at the root of a clean upstream Meshtastic firmware checkout
+(replacing the upstream userPrefs.jsonc) before building.
+
+Effective diff applied:
+
+--- a/userPrefs.jsonc
++++ b/userPrefs.jsonc
+@@ -25,8 +25,12 @@
+   // "USERPREFS_CONFIG_LORA_REGION": "meshtastic_Config_LoRaConfig_RegionCode_US",
+-  // "USERPREFS_CONFIG_OWNER_LONG_NAME": "My Long Name",
+-  // "USERPREFS_CONFIG_OWNER_SHORT_NAME": "MLN",
++  // "USERPREFS_CONFIG_OWNER_LONG_NAME": "My Long Name",
++  // "USERPREFS_CONFIG_OWNER_SHORT_NAME": "MLN",
++  // ---- EFMesh ambassador defaults ----
++  "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com nodes on MF!",
++  "USERPREFS_CONFIG_OWNER_SHORT_NAME": "⚠",
+   // "USERPREFS_CONFIG_DEVICE_ROLE": "meshtastic_Config_DeviceConfig_Role_CLIENT",

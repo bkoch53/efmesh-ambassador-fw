@@ -1,0 +1,22 @@
+From: Barry <barry@curran.co>
+Date: 2026-05-14
+Subject: [PATCH 2/3] EFMesh: default canned/invite message
+
+Replaces the upstream Arizona-Meshtastic-Community default canned
+message with the Electric Forest Meshtastic Community invite. The
+AmbassadorModule sends this string (prefixed with "Hello <shortname>, ")
+as a direct message to any newly-discovered node.
+
+EFMesh is NOT officially endorsed by Electric Forest. EFMesh is a
+community-run Meshtastic mesh organized around Electric Forest
+attendees.
+
+--- a/src/modules/CannedMessageModule.cpp
++++ b/src/modules/CannedMessageModule.cpp
+@@ -2301,7 +2301,7 @@
+ void CannedMessageModule::installDefaultCannedMessageModuleConfig()
+ {
+-    const char *defaultMessages = "I'd like to invite you to join the Arizona Meshtastic Community (azmsh.net) over on MediumFast Slot 18";
++    const char *defaultMessages = "Hello! I'd like to invite you to join the Electric Forest Meshtastic Community (efmesh.com) over on MediumFast preset.";
+     strncpy(cannedMessageModuleConfig.messages, defaultMessages, sizeof(cannedMessageModuleConfig.messages));
+ }
