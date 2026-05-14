@@ -23,8 +23,8 @@
   // "USERPREFS_CONFIG_OWNER_LONG_NAME": "My Long Name",
   // "USERPREFS_CONFIG_OWNER_SHORT_NAME": "MLN",
   // ---- EFMesh ambassador defaults (overrides the commented examples above) ----
-  // long_name is 40 bytes max incl null. "Join 100+ EFMesh.com nodes on MF!" = 33 bytes. Fits.
-  "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.com nodes on MF!",
+  // long_name is 40 bytes max incl null. "Join 100+ EFMesh.org on MediumFast!" = 35 bytes. Fits.
+  "USERPREFS_CONFIG_OWNER_LONG_NAME": "Join 100+ EFMesh.org on MediumFast!",
   // short_name is 5 bytes max incl null. "⚠️" (U+26A0 + U+FE0F variation selector) = 6 utf-8 bytes,
   // does NOT fit. Use bare "⚠" (U+26A0, 3 bytes) so it fits with null terminator.
   // Heltec V3/V4 OLEDs are 1-bit monochrome and render the bare warning-sign glyph from the font;
