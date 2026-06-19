@@ -1,0 +1,3 @@
+# Requirements for CI and caching
+# PlatformIO used to build the firmware. Pin or tighten the version if you want deterministic builds.
+platformio>=7.0.0
