@@ -13,6 +13,8 @@ on:
         required: false
         type: string
   push:
+    branches:
+      - '**'
     tags:
       - 'v*'
 
@@ -70,9 +72,18 @@ jobs:
     name: Publish release
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || inputs.create_release
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.create_release ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/master'
 
     steps:
+      - name: Check out EFMesh firmware overlay
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download firmware artifacts
         uses: actions/download-artifact@v4
         with:
@@ -82,19 +93,38 @@ jobs:
       - name: Choose release tag
         id: release_tag
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
+          if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]]; then
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware ${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware latest" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
           elif [[ -n "${{ inputs.release_tag }}" ]]; then
             echo "tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware ${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
           else
             echo "tag=manual-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware manual-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Move rolling latest tag to this commit
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          git tag --force latest "$GITHUB_SHA"
+          git push --force origin latest
 
       - name: Create or update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
-          name: EFMesh Ambassador Firmware ${{ steps.release_tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release_tag.outputs.name }}
+          make_latest: ${{ steps.release_tag.outputs.make_latest }}
+          overwrite_files: true
           body: |
             EFMesh Ambassador firmware builds for supported boards.
 

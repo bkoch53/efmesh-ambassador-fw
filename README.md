@@ -49,17 +49,17 @@ You have three options.
 
 ### Option A — GitHub Actions / Releases (recommended)
 
-Every tagged release and manual workflow run can build all supported firmware artifacts in GitHub Actions. This is the easiest way to build the T1000-E UF2 when a local machine cannot clone or compile the upstream firmware.
+Every commit builds all supported firmware artifacts in GitHub Actions. Commits merged to `main` or `master` automatically update the rolling `latest` release, while version tags publish stable releases. This is the easiest way to build the T1000-E UF2 when a local machine cannot clone or compile the upstream firmware.
 
-1. Open the repository's **Actions** tab and run **Build firmware and release**.
-2. Leave **Create or update a GitHub Release** enabled to publish downloadable firmware assets, or disable it if you only want temporary workflow artifacts.
-3. Download the generated release asset for your board:
+1. Merge or push a commit to run the **Build firmware and release** workflow automatically.
+2. For a release build, merge to `main`/`master` to update the rolling `latest` release, push a `v*` tag for a stable release, or run the workflow manually with **Create or update a GitHub Release** enabled.
+3. Download the generated release or workflow artifact for your board:
    - `efmesh-ambassador-heltec-v3.bin` for Heltec V3
    - `efmesh-ambassador-heltec-v4.bin` for Heltec V4
    - `efmesh-ambassador-t1000-e.uf2` for Seeed SenseCAP T1000-E
 4. Flash the downloaded `.bin` or `.uf2` using one of the options below.
 
-Pushing a tag that starts with `v`, for example `v1.0.0`, also builds all three boards and publishes the same release assets automatically.
+Pushing any branch commit builds all three boards and stores workflow artifacts. Merging to `main` or `master` additionally updates the rolling `latest` GitHub Release, and pushing a tag that starts with `v`, for example `v1.0.0`, publishes a stable release with the same assets.
 
 ### Option B — Web flasher (easiest local flashing)
 
