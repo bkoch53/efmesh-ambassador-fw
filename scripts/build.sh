@@ -74,7 +74,16 @@ FIRMWARE_PATH="$BUILD_DIR/firmware.$FIRMWARE_EXT"
 if [[ ! -f "$FIRMWARE_PATH" ]]; then
     shopt -s nullglob
     firmware_candidates=("$BUILD_DIR"/firmware-"$PIO_ENV"-*."$FIRMWARE_EXT")
+    factory_candidates=("$BUILD_DIR"/firmware-"$PIO_ENV"-*.factory."$FIRMWARE_EXT")
     shopt -u nullglob
+    for factory_candidate in "${factory_candidates[@]}"; do
+        for i in "${!firmware_candidates[@]}"; do
+            if [[ "${firmware_candidates[$i]}" == "$factory_candidate" ]]; then
+                unset 'firmware_candidates[$i]'
+            fi
+        done
+    done
+    firmware_candidates=("${firmware_candidates[@]}")
     if (( ${#firmware_candidates[@]} == 1 )); then
         FIRMWARE_PATH="${firmware_candidates[0]}"
     else
