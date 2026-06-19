@@ -1,0 +1,135 @@
+name: Build firmware and release
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: Create or update a GitHub Release with the firmware artifacts
+        required: true
+        default: true
+        type: boolean
+      release_tag:
+        description: Release tag to use for manual releases (defaults to manual-<run number>)
+        required: false
+        type: string
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.board }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: heltec-v3
+            artifact: firmware.bin
+            release_asset: efmesh-ambassador-heltec-v3.bin
+          - board: heltec-v4
+            artifact: firmware.bin
+            release_asset: efmesh-ambassador-heltec-v4.bin
+          - board: t1000-e
+            artifact: firmware.uf2
+            release_asset: efmesh-ambassador-t1000-e.uf2
+
+    steps:
+      - name: Check out EFMesh firmware overlay
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Build firmware
+        run: ./scripts/build.sh ${{ matrix.board }}
+
+      - name: Stage release asset
+        run: |
+          mkdir -p dist
+          cp build-out/${{ matrix.board }}/${{ matrix.artifact }} dist/${{ matrix.release_asset }}
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.release_asset }}
+          path: dist/${{ matrix.release_asset }}
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.create_release ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Check out EFMesh firmware overlay
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download firmware artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Choose release tag
+        id: release_tag
+        run: |
+          if [[ "${{ startsWith(github.ref, 'refs/tags/v') }}" == "true" ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware ${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware latest" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${{ inputs.release_tag }}" ]]; then
+            echo "tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware ${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=manual-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+            echo "name=EFMesh Ambassador Firmware manual-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Move rolling latest tag to this commit
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          git tag --force latest "$GITHUB_SHA"
+          git push --force origin latest
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release_tag.outputs.name }}
+          make_latest: ${{ steps.release_tag.outputs.make_latest }}
+          overwrite_files: true
+          body: |
+            EFMesh Ambassador firmware builds for supported boards.
+
+            Assets:
+            - `efmesh-ambassador-heltec-v3.bin` for Heltec V3
+            - `efmesh-ambassador-heltec-v4.bin` for Heltec V4
+            - `efmesh-ambassador-t1000-e.uf2` for Seeed SenseCAP T1000-E
+          files: dist/*

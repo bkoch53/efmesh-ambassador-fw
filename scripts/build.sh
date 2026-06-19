@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the EFMesh ambassador firmware for Heltec V3 / V4.
+# Build the EFMesh ambassador firmware for supported boards.
 #
 # What this does:
 #   1. Clones the upstream Meshtastic firmware ambassador branch
@@ -16,17 +16,20 @@
 # Usage:
 #   scripts/build.sh heltec-v3
 #   scripts/build.sh heltec-v4
+#   scripts/build.sh t1000-e
 #
 # Output:
-#   ./build-out/<board>/firmware.bin
+#   ./build-out/<board>/firmware.bin for ESP32-S3 boards
+#   ./build-out/<board>/firmware.uf2 for nRF52 UF2 boards
 
 set -euo pipefail
 
 BOARD="${1:-heltec-v3}"
 case "$BOARD" in
-    heltec-v3) PIO_ENV="heltec-v3" ;;
-    heltec-v4) PIO_ENV="heltec-v4" ;;
-    *) echo "Unsupported board: $BOARD. Use heltec-v3 or heltec-v4." >&2 ; exit 1 ;;
+    heltec-v3) PIO_ENV="heltec-v3"; FIRMWARE_EXT="bin" ;;
+    heltec-v4) PIO_ENV="heltec-v4"; FIRMWARE_EXT="bin" ;;
+    t1000-e|seeed-t1000-e|seeed_wio_tracker_L1) PIO_ENV="seeed_wio_tracker_L1"; FIRMWARE_EXT="uf2" ;;
+    *) echo "Unsupported board: $BOARD. Use heltec-v3, heltec-v4, or t1000-e." >&2 ; exit 1 ;;
 esac
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -66,12 +69,12 @@ echo "==> Building with PlatformIO (env: $PIO_ENV)..."
 cd "$WORK/firmware"
 pio run -e "$PIO_ENV"
 
-BIN_PATH="$WORK/firmware/.pio/build/$PIO_ENV/firmware.bin"
-if [[ ! -f "$BIN_PATH" ]]; then
-    echo "Build did not produce firmware.bin at $BIN_PATH" >&2
+FIRMWARE_PATH="$WORK/firmware/.pio/build/$PIO_ENV/firmware.$FIRMWARE_EXT"
+if [[ ! -f "$FIRMWARE_PATH" ]]; then
+    echo "Build did not produce firmware.$FIRMWARE_EXT at $FIRMWARE_PATH" >&2
     ls "$WORK/firmware/.pio/build/$PIO_ENV/" >&2 || true
     exit 1
 fi
 
-cp "$BIN_PATH" "$OUT/firmware.bin"
-echo "==> Done. Output: $OUT/firmware.bin"
+cp "$FIRMWARE_PATH" "$OUT/firmware.$FIRMWARE_EXT"
+echo "==> Done. Output: $OUT/firmware.$FIRMWARE_EXT"
