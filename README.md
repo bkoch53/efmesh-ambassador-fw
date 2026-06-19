@@ -2,7 +2,7 @@
 
 Customized Meshtastic firmware for the **Electric Forest Meshtastic
 Community** ([efmesh.com](https://efmesh.com)). Flash this on a spare
-Heltec V3 or V4 and it acts as a permanent "front door" beacon: it
+Heltec V3/V4 or a Seeed SenseCAP T1000-E and it acts as a permanent "front door" beacon: it
 introduces itself to every newly-discovered neighbour node and DMs them
 the EFMesh invite. Other users see it in their node list as `⚠ Join 100+
 EFMesh.com on MediumFast!`, which doubles as a self-explanatory CTA.
@@ -14,10 +14,15 @@ EFMesh.com on MediumFast!`, which doubles as a self-explanatory CTA.
 
 ## Compatibility
 
-**Heltec V3 and Heltec V4 only.** Other Meshtastic boards (T-Beam,
-Station G2, RAK, nRF52 family, etc.) have not been tested and the
-prebuilt binaries below will brick them. If you want this on another
+**Heltec V3, Heltec V4, and Seeed SenseCAP T1000-E only.** Other Meshtastic boards (T-Beam,
+Station G2, RAK, other nRF52 family boards, etc.) have not been tested and the
+prebuilt binaries below may brick them. If you want this on another
 board, build from source per the instructions below at your own risk.
+
+The T1000-E is different from the Heltec boards: it is an nRF52 UF2
+target, so the build uses Meshtastic's `seeed_wio_tracker_L1` PlatformIO
+environment and produces `firmware.uf2` instead of an ESP32-S3
+`firmware.bin`.
 
 ## What it does
 
@@ -38,30 +43,44 @@ info to get the new node's public key, then DMs them the invite
 The invite is sent **once per node** and **as a direct message** (not on
 a channel) — this is non-spammy by design.
 
-## Flash a Heltec V3 or V4
+## Flash a Heltec V3/V4 or T1000-E
 
-You have two options.
+You have three options.
 
-### Option A — Web flasher (easiest)
+### Option A — GitHub Actions / Releases (recommended)
 
-1. Plug your Heltec V3 / V4 into your computer via USB-C.
-2. Build the binary locally (see **Build from source** below) or grab a
+Every tagged release and manual workflow run can build all supported firmware artifacts in GitHub Actions. This is the easiest way to build the T1000-E UF2 when a local machine cannot clone or compile the upstream firmware.
+
+1. Open the repository's **Actions** tab and run **Build firmware and release**.
+2. Leave **Create or update a GitHub Release** enabled to publish downloadable firmware assets, or disable it if you only want temporary workflow artifacts.
+3. Download the generated release asset for your board:
+   - `efmesh-ambassador-heltec-v3.bin` for Heltec V3
+   - `efmesh-ambassador-heltec-v4.bin` for Heltec V4
+   - `efmesh-ambassador-t1000-e.uf2` for Seeed SenseCAP T1000-E
+4. Flash the downloaded `.bin` or `.uf2` using one of the options below.
+
+Pushing a tag that starts with `v`, for example `v1.0.0`, also builds all three boards and publishes the same release assets automatically.
+
+### Option B — Web flasher (easiest local flashing)
+
+1. Plug your Heltec V3/V4 into your computer via USB-C, or put the T1000-E into DFU mode so it appears as a `T1000-E` drive.
+2. Build the firmware locally (see **Build from source** below) or grab a
    community-built binary from the
    [releases](https://github.com/efmesh/efmesh-ambassador-fw/releases)
-   page once available.
+   page.
 3. Open the [Meshtastic Web
    Flasher](https://flasher.meshtastic.org/).
 4. Choose **"Custom firmware"** in the firmware dropdown.
-5. Upload the `.bin` file you got in step 2.
+5. Upload the `.bin` file for Heltec or the `.uf2` file for T1000-E that you got in step 2.
 6. Click **Connect** and pick the USB serial device that appears.
 7. Click **Flash**. Wait for the progress bar; the device will reboot.
 
-After flashing, the node should boot up identifying itself as `⚠ Join
+For T1000-E UF2 flashing, copy `build-out/t1000-e/firmware.uf2` to the mounted DFU drive if you are not using the web flasher. After flashing, the node should boot up identifying itself as `⚠ Join
 100+ EFMesh.com on MediumFast!` on whatever frequency / preset your
 region uses. Use the Meshtastic phone app to switch it onto
 **MediumFast** if that isn't already the regional default.
 
-### Option B — esptool CLI (terminal)
+### Option C — esptool CLI (terminal)
 
 For folks who prefer not to touch a web flasher.
 
@@ -97,7 +116,8 @@ git clone https://github.com/efmesh/efmesh-ambassador-fw.git
 cd efmesh-ambassador-fw
 pip install platformio
 ./scripts/build.sh heltec-v3   # or: ./scripts/build.sh heltec-v4
-# output: ./build-out/heltec-v3/firmware.bin
+./scripts/build.sh t1000-e     # Seeed SenseCAP T1000-E
+# outputs: ./build-out/heltec-v3/firmware.bin or ./build-out/t1000-e/firmware.uf2
 ```
 
 The build script:
@@ -108,8 +128,10 @@ The build script:
    `src/modules/CannedMessageModule.cpp`.
 3. Copies our [`src/userPrefs.jsonc`](./src/userPrefs.jsonc) over the
    upstream one to bake in owner short/long name defaults.
-4. Runs `pio run -e heltec-v<n>` to compile.
-5. Copies the resulting `firmware.bin` into `./build-out/<board>/`.
+4. Runs the matching PlatformIO environment (`heltec-v<n>` for Heltec or
+   `seeed_wio_tracker_L1` for T1000-E) to compile.
+5. Copies the resulting firmware artifact into `./build-out/<board>/`
+   (`firmware.bin` for Heltec, `firmware.uf2` for T1000-E).
 
 ## How the customizations work
 
