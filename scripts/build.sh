@@ -69,11 +69,20 @@ echo "==> Building with PlatformIO (env: $PIO_ENV)..."
 cd "$WORK/firmware"
 pio run -e "$PIO_ENV"
 
-FIRMWARE_PATH="$WORK/firmware/.pio/build/$PIO_ENV/firmware.$FIRMWARE_EXT"
+BUILD_DIR="$WORK/firmware/.pio/build/$PIO_ENV"
+FIRMWARE_PATH="$BUILD_DIR/firmware.$FIRMWARE_EXT"
 if [[ ! -f "$FIRMWARE_PATH" ]]; then
-    echo "Build did not produce firmware.$FIRMWARE_EXT at $FIRMWARE_PATH" >&2
-    ls "$WORK/firmware/.pio/build/$PIO_ENV/" >&2 || true
-    exit 1
+    shopt -s nullglob
+    firmware_candidates=("$BUILD_DIR"/firmware-"$PIO_ENV"-*."$FIRMWARE_EXT")
+    shopt -u nullglob
+    if (( ${#firmware_candidates[@]} == 1 )); then
+        FIRMWARE_PATH="${firmware_candidates[0]}"
+    else
+        echo "Build did not produce a unique firmware.$FIRMWARE_EXT artifact in $BUILD_DIR" >&2
+        echo "Expected either firmware.$FIRMWARE_EXT or exactly one firmware-$PIO_ENV-*.$FIRMWARE_EXT file." >&2
+        ls "$BUILD_DIR" >&2 || true
+        exit 1
+    fi
 fi
 
 cp "$FIRMWARE_PATH" "$OUT/firmware.$FIRMWARE_EXT"
